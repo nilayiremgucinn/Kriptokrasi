@@ -1,17 +1,88 @@
+import { assert } from "console";
+import { ERROR_MESSAGES } from "./errors";
 import { PROC_CONTEXT } from "./types";
 
-export class Query {
-    chat_id: Number;
-    context: PROC_CONTEXT;
-    data: string[]
 
-    constructor(chat_id:Number, context:PROC_CONTEXT) {
-        this.chat_id = chat_id;
-        this.context = context;
-        this.data = [];
-    }
-
-    addData(datatoAdd: string){
-        this.data.push(datatoAdd);
+interface QuerieObjs {
+    [chat_id: number]: {
+        context: PROC_CONTEXT;
+        data: string[]
     }
 }
+
+
+export class QueryList {
+    queries: QuerieObjs
+
+    constructor() {
+        this.queries = {};
+    }
+
+    newQuery(chat_id: number, context: PROC_CONTEXT) {
+        this.queries[chat_id] = { context: context, data: [] };
+    }
+
+    addData(chat_id: number, data: any) {
+
+        let query = this.queries[chat_id];
+
+        if (query) {
+            query.data.push(data);
+        } else {
+            throw new Error(ERROR_MESSAGES.NAN_QUERY);
+        }
+    }
+
+    addDataSafe(chat_id: number, context: PROC_CONTEXT, data: any) {
+
+        let query = this.queries[chat_id];
+        if (query) {
+            if (query.context === context) {
+                query.data.push(data);
+            } else {
+                throw new Error(ERROR_MESSAGES.INV_CONTX);
+            }
+        } else {
+            throw new Error(ERROR_MESSAGES.NAN_QUERY);
+        }
+    }
+
+    getContext(chat_id:number) {
+        let query = this.queries[chat_id];
+
+        if (query) {
+            return query.context;
+        } else {
+            throw new Error(ERROR_MESSAGES.NAN_CONTX);
+        }
+
+    }
+
+    getQuery(chat_id: number) {
+        return this.queries[chat_id];
+    }
+
+    removeQuery(chat_id: number) {
+        delete this.queries[chat_id];
+    }
+
+
+}
+
+
+// export class Query {
+//     chat_id: Number;
+//     context: PROC_CONTEXT;
+//     data: string[]
+
+//     constructor(chat_id:Number, context:PROC_CONTEXT) {
+//         this.chat_id = chat_id;
+//         this.context = context;
+//         this.data = [];
+//     }
+
+
+//     addData(datatoAdd: string){
+//         this.data.push(datatoAdd);
+//     }
+// }

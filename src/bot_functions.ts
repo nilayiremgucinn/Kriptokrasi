@@ -1,5 +1,5 @@
 import axios from "axios";
-import { buffer } from "stream/consumers";
+
 
 export async function getIndicator(data: string[]) {
     const ind = data[0];
