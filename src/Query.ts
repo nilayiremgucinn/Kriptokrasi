@@ -34,7 +34,6 @@ export class QueryList {
     }
 
     addDataSafe(chat_id: number, context: PROC_CONTEXT, data: any) {
-
         let query = this.queries[chat_id];
         if (query) {
             if (query.context === context) {
@@ -55,7 +54,6 @@ export class QueryList {
         } else {
             throw new Error(ERROR_MESSAGES.NAN_CONTX);
         }
-
     }
 
     getQuery(chat_id: number) {
@@ -68,21 +66,3 @@ export class QueryList {
 
 
 }
-
-
-// export class Query {
-//     chat_id: Number;
-//     context: PROC_CONTEXT;
-//     data: string[]
-
-//     constructor(chat_id:Number, context:PROC_CONTEXT) {
-//         this.chat_id = chat_id;
-//         this.context = context;
-//         this.data = [];
-//     }
-
-
-//     addData(datatoAdd: string){
-//         this.data.push(datatoAdd);
-//     }
-// }
