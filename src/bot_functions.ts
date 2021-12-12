@@ -82,14 +82,15 @@ export async function getTrendInd() {
 
 export async function getRapidMov(data: string[]) { //data: pair exchange
 
-    let response = await axios.get(`https://api.cryptometer.io/rapid-movement/?api_key=fT3TiQG131f3ZEqVPmK45WeFZJ90Z4pPpk6XYf1e`);
+    let response = await axios.get(`https://api.cryptometer.io/rapid-movements/?api_key=fT3TiQG131f3ZEqVPmK45WeFZJ90Z4pPpk6XYf1e`);
 
     let msg = "Coinde son bir saat icerisinde dump yada pump hareketi bulunamadi"
-    const pair = data[0].toLowerCase()
-
+    const pair = data[1].toUpperCase()
     for (let i=0; i<response.data["data"].length; i++){
+        //console.log(response.data["data"][i]["pair"])
+        //console.log(response.data["data"][i]["exchange"])
         if (response.data["data"][i]["pair"] == pair){
-            if (response.data["data"][i]["exchange"] == data[1]){
+            if (response.data["data"][i]["exchange"] == data[0].toLowerCase()){
                 msg = `pair:${response.data["data"][i]['pair']}, exchange:${response.data["data"][i]['exchange']}, değişim:${response.data["data"][i]['change_detected']}, taraf:${response.data["data"][i]['side']}`
             }
         }
@@ -106,18 +107,22 @@ export async function getVolFlow (data: string[]){ //data: timeframe fromcoin to
     const fromCoin = data[1].toUpperCase()
     const toCoin = data[2].toUpperCase()
     let msg = ""
+    let found = false;
     for (let i=0; i<buy_flow.length; i++){
         if ((buy_flow[i]["from"] == fromCoin) && (buy_flow[i]["to"] == toCoin)){
             vol = buy_flow[i]["volume"]
             msg = `Volume: ${vol}, Akış: Alım`
         }                      
     }
-    for (let i=0; i<sell_flow.length; i++){
-        if ((sell_flow[i]["from"] == fromCoin) && (sell_flow[i]["to"] == toCoin)){
-            vol = sell_flow[i]["volume"]
-            msg = `Volume: ${vol}, Akış: Satım`
-        }                      
-    }  
+    if (!found){
+        for (let i=0; i<sell_flow.length; i++){
+            if ((sell_flow[i]["from"] == fromCoin) && (sell_flow[i]["to"] == toCoin)){
+                vol = sell_flow[i]["volume"]
+                msg = `Volume: ${vol}, Akış: Satım` 
+                return msg;
+            }                      
+        } 
+    }
     return msg
 }
 
@@ -126,7 +131,9 @@ export async function getXTrade(data: string[]) {
     const e = data[0].toLowerCase();
 
     let response = await axios.get(`https://api.cryptometer.io/xtrades/?symbol=${symbol}&e=${e}&api_key=fT3TiQG131f3ZEqVPmK45WeFZJ90Z4pPpk6XYf1e`);
-
+    if (response.data['success'] == false){
+        return "Yanlis exchange - parite"
+    }
     let maxB = 0.0
     let maxS = 0.0
     for (let i=0; i<response.data["data"].length; i++){
@@ -160,10 +167,10 @@ export async function getTradeVol24h(data: string[]) {
     const pair = data[1].toUpperCase();
     const e = data[0].toLowerCase();
 
-    let response = await axios.get(`https://api.cryptometer.io/24h-trading-volume-v2/?pair=${pair}&e=${e}&api_key=fT3TiQG131f3ZEqVPmK45WeFZJ90Z4pPpk6XYf1e`);
-
-    //let msg = `Son 3 skor: ${response.data[0]}`;
-    return response.data["data"]
+    let response = await axios.get(`https://api.cryptometer.io/24h-trade-volume-v2/?pair=${pair}&e=${e}&api_key=fT3TiQG131f3ZEqVPmK45WeFZJ90Z4pPpk6XYf1e`);
+    console.log(response.data)
+    let msg = `Alis: ${response.data["data"][0]["buy"]}  Satis: ${response.data["data"][0]["sell"]}`;
+    return msg;
 }
 
 export async function getOhlcv(data: string[]) { 
@@ -171,7 +178,7 @@ export async function getOhlcv(data: string[]) {
     const tf = data[1]
     const e = data[0].toLowerCase();
 
-    let response = await axios.get(`https://api.cryptometer.io/ohlcv/?timeframe=${tf}pair=${pair}&e=${e}&api_key=fT3TiQG131f3ZEqVPmK45WeFZJ90Z4pPpk6XYf1e`);
+    let response = await axios.get(`https://api.cryptometer.io/ohlcv/?timeframe=${tf}&pair=${pair}&e=${e}&api_key=fT3TiQG131f3ZEqVPmK45WeFZJ90Z4pPpk6XYf1e`);
 
     let maxO = 0.0
     let maxC = 0.0
@@ -209,17 +216,16 @@ export async function getOhlcv(data: string[]) {
 }
 
 export async function getDailyVolume(data: string[]) { 
-    const symbol = data[1].toUpperCase();
-    const e = data[0].toLowerCase();
+    const symbol = data[0].toUpperCase();
 
-    let response = await axios.get(`https://api.cryptometer.io/current-day-merged-volume-v2/?symbol=${symbol}&e=${e}&api_key=fT3TiQG131f3ZEqVPmK45WeFZJ90Z4pPpk6XYf1e`);
+    let response = await axios.get(`https://api.cryptometer.io/current-day-merged-volume-v2/?symbol=${symbol}&api_key=fT3TiQG131f3ZEqVPmK45WeFZJ90Z4pPpk6XYf1e`);
 
     //let msg = `Son 3 skor: ${response.data[0]}`;
     return response.data["data"]
 }
 
 export async function getHourlyVolume(data: string[]) { 
-    const symbol = data[1].toLowerCase();
+    const symbol = data[0].toLowerCase();
 
     let response = await axios.get(`https://api.cryptometer.io/hourly-buy-sell-merged-volume/?symbol=${symbol}&api_key=fT3TiQG131f3ZEqVPmK45WeFZJ90Z4pPpk6XYf1e`);
     //let msg = `Son 3 skor: ${response.data[0]}`;
@@ -242,13 +248,14 @@ export async function getTickerList(data: string[]) {
     const pair = data[1].toUpperCase();
     const e = data[0].toLowerCase(); 
 
-    let response = await axios.get(`https://api.cryptometer.io/current-day-merged-volume-v2/?&e=${e}&api_key=fT3TiQG131f3ZEqVPmK45WeFZJ90Z4pPpk6XYf1e`);
+    let response = await axios.get(`https://api.cryptometer.io/tickerlist-pro/?&e=${e}&api_key=fT3TiQG131f3ZEqVPmK45WeFZJ90Z4pPpk6XYf1e`);
     let msg = ""
     for (let i=0; i<response.data["data"].length; i++){
-        if (response.data["data"][i]["market_pair"] == pair)
+        if (response.data["data"][i]["market_pair"] == pair){
             msg = response.data["data"][i];
+            break;
+        } 
     }
-
     return msg;
 }
 

@@ -6,7 +6,7 @@ import path from 'path';
 import { PROC_CONTEXT } from './types';
 export const ROOT_PATH = __dirname;
 import { QueryList } from './Query';
-import { getIndicator, getLongShort, getCurrentLS, getBitmexLiq, getBtcLiq, getMergedVolume, getTrendInd, getTickerList, getXTrade, getTotalLiq, getHourlyVolume, getDailyVolume, getLiveTrade, getOhlcv, getTradeVol24h, getOpenInterest, getRapidMov } from './bot_functions';
+import { getIndicator, getLongShort, getCurrentLS, getBitmexLiq, getBtcLiq, getMergedVolume, getTrendInd, getTickerList, getXTrade, getTotalLiq, getHourlyVolume, getDailyVolume, getLiveTrade, getOhlcv, getTradeVol24h, getOpenInterest, getRapidMov, getVolFlow } from './bot_functions';
 
 
 let context: PROC_CONTEXT = PROC_CONTEXT.DEFAULT;
@@ -135,8 +135,7 @@ bot.hears(BUTTON_LIST.STOCK, async (ctx) => {
             ctx.reply("symb yazip sembol seciniz:", { reply_markup: KEYBOARDS.DATA });
             break;
         case PROC_CONTEXT.TICKERLIST:
-            reply = await getTickerList([message]);
-            ctx.reply(reply, {reply_markup: KEYBOARDS.DATA});
+            ctx.reply("mp yazip parite seciniz.", {reply_markup: KEYBOARDS.DATA});
             break;
         case PROC_CONTEXT.XTRADE: 
             ctx.reply("symb yazip sembol seciniz:", { reply_markup: KEYBOARDS.DATA });
@@ -205,19 +204,6 @@ bot.hears(BUTTON_LIST.SOURCE, async (ctx) => {
     ctx.reply("Period yaziniz", { reply_markup: KEYBOARDS.DATA});
 })
 
-bot.hears(/^[0-9]{1,3}/, async (ctx) => {
-    const message = ctx.message.text;
-    const chat_id = ctx.message.chat.id;
-    let query = Queries.getQuery(chat_id);
-    if (query.context == PROC_CONTEXT.INDICATOR){
-        Queries.addDataSafe(chat_id, PROC_CONTEXT.INDICATOR, message);
-        ctx.reply("Zaman araligi seciniz.", {reply_markup: KEYBOARDS.TIMEFRAME})
-    }
-    else{
-        ctx.reply("Lutfen islem seciniz", {reply_markup: KEYBOARDS.DATA});
-    }
-});
-
 bot.hears(BUTTON_LIST.TIMEFRAME, async (ctx) => {    
     const message = ctx.message.text;
     const chat_id = ctx.message.chat.id;
@@ -254,12 +240,28 @@ bot.hears(BUTTON_LIST.TIMEFRAME, async (ctx) => {
             ctx.reply("pa yazip parite seçiniz:", { reply_markup: KEYBOARDS.DATA });
             break;     
         case PROC_CONTEXT.INDICATOR: 
+            ctx.reply("mp yazip coin seciniz:", { reply_markup: KEYBOARDS.DATA});
+            break;
+        case PROC_CONTEXT.MERGEDVOL: 
             ctx.reply("symb yazip coin seciniz:", { reply_markup: KEYBOARDS.DATA});
             break;
         default:
             break;
     }
 })
+
+bot.hears(/^[0-9]{1,3}/, async (ctx) => {
+    const message = ctx.message.text;
+    const chat_id = ctx.message.chat.id;
+    let query = Queries.getQuery(chat_id);
+    if (query.context == PROC_CONTEXT.INDICATOR){
+        Queries.addDataSafe(chat_id, PROC_CONTEXT.INDICATOR, message);
+        ctx.reply("Zaman araligi seciniz.", {reply_markup: KEYBOARDS.TIMEFRAME})
+    }
+    else{
+        ctx.reply("Lutfen islem seciniz", {reply_markup: KEYBOARDS.DATA});
+    }
+});
 
 bot.hears(/(?<=symb ).*/, async (ctx) => {
     const message = ctx.message.text;
@@ -368,11 +370,29 @@ bot.hears(/(?<=mp ).*/, async (ctx) => {
             ctx.reply(reply, {reply_markup:KEYBOARDS.DATA});
             Queries.removeQuery(chat_id);
             break;    
+        case PROC_CONTEXT.TICKERLIST:
+            reply = await getTickerList(query.data);
+            ctx.reply(reply, {reply_markup:KEYBOARDS.DATA});
+            Queries.removeQuery(chat_id);
+            break;
         default:
             Queries.removeQuery(chat_id);
             break;
     
     }
+})
+
+bot.hears(/(?<=fromto ).*/, async (ctx) => {
+    const message = ctx.message.text;
+    const coins = message.split(' ');//split yapicammmmmm
+    const chat_id = ctx.message.chat.id;
+    const context = PROC_CONTEXT.VOLUMEFLOW;
+    let query = Queries.getQuery(chat_id);
+    Queries.addDataSafe(chat_id, context, coins[1]);
+    Queries.addDataSafe(chat_id, context, coins[2]);
+    let reply = await getVolFlow(query.data);
+    ctx.reply(reply, {reply_markup:KEYBOARDS.DATA});
+    Queries.removeQuery(chat_id);
 })
 
 bot.hears(/(?<=stop pls).*/, async (ctx) => {
