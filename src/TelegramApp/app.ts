@@ -1,4 +1,4 @@
-import { Api, TelegramClient } from "telegram";
+import { TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
 import input from 'input';
 import { NewMessage, NewMessageEvent } from "telegram/events";

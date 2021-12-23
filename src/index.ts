@@ -1,8 +1,6 @@
 import { Telegraf } from 'telegraf';
 import { KEYBOARDS } from './keyboards/keyboards';
 import { BUTTON_LIST } from './keyboards/consts';
-import path from 'path';
-//import DatabaseManager from './database';
 import { PROC_CONTEXT } from './types';
 export const ROOT_PATH = __dirname;
 import { QueryList } from './Query';
