@@ -12,10 +12,12 @@
   "dependencies": {
     "@types/puppeteer": "^5.4.4",
     "axios": "^0.24.0",
+    "input": "^1.0.1",
     "nodemon": "^2.0.15",
     "puppeteer": "^13.0.0",
     "sqlite3": "^4.2.0",
-    "telegraf": "^4.4.2"
+    "telegraf": "^4.4.2",
+    "telegram": "^2.1.0"
   },
   "devDependencies": {
     "@types/async": "^3.2.10",

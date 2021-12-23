@@ -12,7 +12,7 @@ import readline from "readline";
     await waitInput();
 
 
-    let elem_list = await page.$$eval('div[id^=message]', elems => elems.map(elem => elem.textContent));
+    let elem_list = await page.$$eval('div[class="content-inner"]', elems => elems.map(elem => elem.textContent));
     elem_list.forEach(elem => console.log(elem));
 
     await browser.close();
